@@ -1,0 +1,2417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UniSpend</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234f46e5'%3E%3Cpath d='M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.73L12 15l5-2.74v3.73z'/%3E%3C/svg%3E" />
+  
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            },
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Immediate Theme Initialization (Pure Black & Pure White) -->
+  <script>
+    (function() {
+      const saved = localStorage.getItem('unispend_theme');
+      if (saved === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* BASELINE SMOOTH STYLING */
+    body {
+      background-color: #ffffff;
+      color: #0f172a;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                  color 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* PURE BLACK OLED THEME */
+    html.dark, body.dark {
+      background-color: #000000 !important;
+      color: #ffffff !important;
+    }
+
+    /* SMOOTH THEME TRANSITIONING ENGINE */
+    html.theme-transitioning,
+    html.theme-transitioning *,
+    html.theme-transitioning *::before,
+    html.theme-transitioning *::after {
+      transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                  border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                  color 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                  fill 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                  stroke 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                  box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      transition-delay: 0s !important;
+    }
+
+    /* Core UI elements smooth transitions */
+    header,
+    aside,
+    main,
+    .card,
+    .clean-input,
+    .tab-btn,
+    #smartInsightsBanner,
+    #runwayCard,
+    #themeToggleBtn,
+    #tourButton,
+    #tutorialCard,
+    #fastLogModal > div,
+    #allowanceModal > div,
+    #savingsModal > div,
+    #budgetCapModal > div {
+      transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                  border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                  color 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                  box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    body.dark ::-webkit-scrollbar-track {
+      background: #000000;
+    }
+    body.dark ::-webkit-scrollbar-thumb {
+      background: #262626;
+    }
+    body.dark ::-webkit-scrollbar-thumb:hover {
+      background: #404040;
+    }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 1rem;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+      transition: all 0.2s ease;
+    }
+    .card:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    body.dark .card {
+      background: #000000 !important;
+      border-color: #262626 !important;
+      box-shadow: 0 0 0 1px #1a1a1a !important;
+    }
+    body.dark .card:hover {
+      border-color: #383838 !important;
+      box-shadow: 0 0 0 1px #333333 !important;
+    }
+
+    .clean-input {
+      background-color: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      color: #0f172a;
+      transition: all 0.15s ease;
+    }
+    .clean-input:focus {
+      outline: none;
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+    }
+
+    body.dark .clean-input {
+      background-color: #0a0a0a !important;
+      border-color: #333333 !important;
+      color: #ffffff !important;
+    }
+    body.dark .clean-input:focus {
+      border-color: #6366f1 !important;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25) !important;
+    }
+
+    /* Dark Mode Header & Nav */
+    body.dark header {
+      background-color: #000000 !important;
+      border-color: #262626 !important;
+    }
+    body.dark h1, body.dark h2, body.dark h3, body.dark h4, body.dark .text-slate-900, body.dark .text-slate-800 {
+      color: #ffffff !important;
+    }
+    body.dark .text-slate-700, body.dark .text-slate-600 {
+      color: #d4d4d4 !important;
+    }
+    body.dark .text-slate-500, body.dark .text-slate-400 {
+      color: #a3a3a3 !important;
+    }
+    body.dark .border-slate-100, body.dark .border-slate-200, body.dark .border-slate-300 {
+      border-color: #262626 !important;
+    }
+    body.dark .bg-slate-50 {
+      background-color: #080808 !important;
+    }
+    body.dark .bg-slate-100 {
+      background-color: #141414 !important;
+    }
+
+    /* Dark Mode Navigation Buttons */
+    body.dark .tab-btn:not(.bg-brand-600) {
+      color: #a3a3a3 !important;
+    }
+    body.dark .tab-btn:not(.bg-brand-600):hover {
+      background-color: #121212 !important;
+      color: #ffffff !important;
+    }
+
+    /* Dark Mode Modals & Popovers */
+    body.dark #fastLogModal > div,
+    body.dark #allowanceModal > div,
+    body.dark #savingsModal > div,
+    body.dark #budgetCapModal > div,
+    body.dark #tutorialCard {
+      background-color: #000000 !important;
+      border-color: #262626 !important;
+      color: #ffffff !important;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.95), 0 0 0 1px #262626 !important;
+    }
+
+    /* Dark Mode Runway Card */
+    body.dark #runwayCard {
+      background: #000000 !important;
+      border-color: #262626 !important;
+    }
+    body.dark #smartInsightsBanner {
+      background-color: #050515 !important;
+      border-color: #1e1b4b !important;
+      color: #e0e7ff !important;
+    }
+
+    /* =========================================================
+       CUSTOM ANIMATED THEME PILL TOGGLE (Matching Reference)
+       ========================================================= */
+    .theme-pill-toggle {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent !important;
+      border: none !important;
+      padding: 2px;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .theme-pill-toggle:hover {
+      transform: scale(1.04);
+    }
+    .theme-pill-toggle:active {
+      transform: scale(0.96);
+    }
+    .theme-pill-toggle:focus-visible .theme-pill-track {
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.45);
+    }
+
+    .theme-pill-track {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 58px;
+      height: 32px;
+      border-radius: 9999px;
+      background-color: #ffffff;
+      border: 3px solid #dcdfe4;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                  border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                  box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .theme-pill-toggle:hover .theme-pill-track {
+      border-color: #cbd0d8;
+    }
+
+    .theme-pill-knob {
+      position: absolute;
+      left: 2px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background-color: #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+      transform: translateX(0);
+      transition: transform 0.45s cubic-bezier(0.34, 1.4, 0.64, 1),
+                  background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                  box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* SVG icons inside the knob */
+    .theme-pill-icon {
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      pointer-events: none;
+      transition: transform 0.45s cubic-bezier(0.34, 1.4, 0.64, 1),
+                  opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Light Mode Active State (Knob on Left) */
+    .theme-pill-icon.icon-sun {
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
+      color: #27272a;
+    }
+    .theme-pill-icon.icon-moon {
+      opacity: 0;
+      transform: scale(0.2) rotate(135deg);
+      color: #dcdfe4;
+    }
+
+    /* Dark Mode Active State (Knob on Right) */
+    html.dark .theme-pill-track,
+    body.dark .theme-pill-track {
+      background-color: #1e2025 !important;
+      border-color: #2e3137 !important;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5) !important;
+    }
+    html.dark .theme-pill-toggle:hover .theme-pill-track,
+    body.dark .theme-pill-toggle:hover .theme-pill-track {
+      border-color: #3d414a !important;
+    }
+
+    html.dark .theme-pill-knob,
+    body.dark .theme-pill-knob {
+      background-color: #35383f !important;
+      transform: translateX(26px) !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    html.dark .theme-pill-icon.icon-sun,
+    body.dark .theme-pill-icon.icon-sun {
+      opacity: 0 !important;
+      transform: scale(0.2) rotate(-135deg) !important;
+    }
+    html.dark .theme-pill-icon.icon-moon,
+    body.dark .theme-pill-icon.icon-moon {
+      opacity: 1 !important;
+      transform: scale(1) rotate(0deg) !important;
+      color: #dcdfe4 !important;
+    }
+    body.dark #tourButton {
+      background-color: #0f0f23 !important;
+      border-color: #312e81 !important;
+      color: #c7d2fe !important;
+    }
+    body.dark .bg-white {
+      background-color: #000000 !important;
+    }
+    body.dark tr:hover {
+      background-color: #0d0d0d !important;
+    }
+
+    /* Interactive Tutorial Spotlight Effect & Bold Active Menu Styles */
+    .tab-btn.bg-brand-600,
+    .tab-btn.bg-brand-600 span {
+      font-weight: 700 !important;
+      color: #ffffff !important;
+    }
+    .tour-highlight-active {
+      position: relative !important;
+      z-index: 55 !important;
+      box-shadow: 0 0 0 4px #4f46e5, 0 0 35px rgba(79, 70, 229, 0.55) !important;
+      border-radius: 0.75rem !important;
+      transition: all 0.25s ease-in-out !important;
+      font-weight: 700 !important;
+    }
+    .tour-highlight-active span,
+    .tour-highlight-active div,
+    .tour-highlight-active button {
+      font-weight: 700 !important;
+    }
+    .tour-highlight-active.bg-brand-600,
+    .tour-highlight-active.bg-brand-600 span,
+    .tour-highlight-active.bg-brand-600 i {
+      color: #ffffff !important;
+    }
+    body:not(.dark) .tour-highlight-active:not(.bg-brand-600) {
+      background-color: #ffffff !important;
+      color: #0f172a !important;
+    }
+    body:not(.dark) .tour-highlight-active:not(.bg-brand-600) span {
+      color: #0f172a !important;
+    }
+    body:not(.dark) .tour-highlight-active:not(.bg-brand-600) i {
+      color: #4f46e5 !important;
+    }
+    body.dark .tour-highlight-active:not(.bg-brand-600) {
+      background-color: #000000 !important;
+      color: #ffffff !important;
+    }
+    body.dark .tour-highlight-active:not(.bg-brand-600) span {
+      color: #ffffff !important;
+    }
+    body.dark .tour-highlight-active:not(.bg-brand-600) i {
+      color: #818cf8 !important;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-50 text-slate-800">
+
+  <!-- Top Navigation Header -->
+  <header class="sticky top-0 z-40 bg-white border-b border-slate-200 px-4 sm:px-8 py-3.5 shadow-sm">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      
+      <!-- Brand Logo & Title: strictly "UniSpend" -->
+      <div class="flex items-center gap-3 p-1.5 rounded-xl transition-all" id="brandLogo">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 text-white flex items-center justify-center shadow-md shadow-brand-500/20 shrink-0">
+          <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-extrabold tracking-tight text-slate-900">UniSpend</h1>
+          <p class="text-xs text-slate-500 hidden sm:block">
+            Student Allowance & Expense OS
+          </p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Pure Black & White Interactive Pill Theme Toggle Switch -->
+        <button onclick="toggleTheme()" id="themeToggleBtn" class="theme-pill-toggle" type="button" role="switch" aria-label="Toggle dark and light theme" title="Switch between Light and Pure Black OLED theme">
+          <span class="theme-pill-track">
+            <span class="theme-pill-knob">
+              <!-- Sun Icon (Light Mode) -->
+              <svg class="theme-pill-icon icon-sun" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="12" cy="12" r="4.3"/>
+                <rect x="10.8" y="1.8" width="2.4" height="4" rx="1.2"/>
+                <rect x="10.8" y="1.8" width="2.4" height="4" rx="1.2" transform="rotate(45 12 12)"/>
+                <rect x="10.8" y="1.8" width="2.4" height="4" rx="1.2" transform="rotate(90 12 12)"/>
+                <rect x="10.8" y="1.8" width="2.4" height="4" rx="1.2" transform="rotate(135 12 12)"/>
+                <rect x="10.8" y="1.8" width="2.4" height="4" rx="1.2" transform="rotate(180 12 12)"/>
+                <rect x="10.8" y="1.8" width="2.4" height="4" rx="1.2" transform="rotate(225 12 12)"/>
+                <rect x="10.8" y="1.8" width="2.4" height="4" rx="1.2" transform="rotate(270 12 12)"/>
+                <rect x="10.8" y="1.8" width="2.4" height="4" rx="1.2" transform="rotate(315 12 12)"/>
+              </svg>
+              <!-- Moon Icon (Dark Mode) -->
+              <svg class="theme-pill-icon icon-moon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M13 3.5 C 19.5 7 19.5 17 13 20.5 C 16.5 16 16.5 8 13 3.5 Z"/>
+              </svg>
+            </span>
+          </span>
+        </button>
+
+        <!-- Interactive Tour Guide Button -->
+        <button onclick="startTutorial(0)" id="tourButton" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-brand-700 border border-indigo-200 shadow-sm transition-all active:scale-95" title="Start Interactive Tour Guide">
+          <i data-lucide="compass" class="w-4 h-4 text-brand-600"></i>
+          <span class="hidden sm:inline">Tour & Guide</span>
+          <span class="sm:hidden">Tour</span>
+        </button>
+
+        <!-- Quick Log Button -->
+        <button onclick="openFastLogModal()" id="btnLogExpense" class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-brand-600 hover:bg-brand-700 text-white shadow-sm transition-all active:scale-95">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span>Log Expense</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col md:flex-row gap-6">
+
+    <!-- Navigation Sidebar -->
+    <aside class="w-full md:w-60 shrink-0 space-y-6">
+      <div class="card p-3 bg-white">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-3 py-1">
+          Menu
+        </div>
+        <nav class="space-y-1 mt-1">
+          <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all bg-brand-600 text-white shadow-sm">
+            <div class="flex items-center gap-3">
+              <i data-lucide="layout-dashboard" class="w-4 h-4 text-white"></i>
+              <span>Dashboard</span>
+            </div>
+          </button>
+          <button onclick="switchTab('allowances')" id="nav-allowances" class="tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-neutral-300 hover:bg-slate-100 dark:hover:bg-neutral-900 transition-all">
+            <div class="flex items-center gap-3">
+              <i data-lucide="wallet-cards" class="w-4 h-4 text-slate-400 dark:text-neutral-400"></i>
+              <span>Allowances</span>
+            </div>
+            <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 font-mono font-bold" id="badgeAllowanceCount">0</span>
+          </button>
+          <button onclick="switchTab('expenses')" id="nav-expenses" class="tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-neutral-300 hover:bg-slate-100 dark:hover:bg-neutral-900 transition-all">
+            <div class="flex items-center gap-3">
+              <i data-lucide="receipt" class="w-4 h-4 text-slate-400 dark:text-neutral-400"></i>
+              <span>Expense Log</span>
+            </div>
+            <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400 font-mono font-bold" id="badgeExpenseCount">0</span>
+          </button>
+          <button onclick="switchTab('budgets')" id="nav-budgets" class="tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-neutral-300 hover:bg-slate-100 dark:hover:bg-neutral-900 transition-all">
+            <div class="flex items-center gap-3">
+              <i data-lucide="pie-chart" class="w-4 h-4 text-slate-400 dark:text-neutral-400"></i>
+              <span>Budget Caps</span>
+            </div>
+          </button>
+          <button onclick="switchTab('savings')" id="nav-savings" class="tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-neutral-300 hover:bg-slate-100 dark:hover:bg-neutral-900 transition-all">
+            <div class="flex items-center gap-3">
+              <i data-lucide="piggy-bank" class="w-4 h-4 text-slate-400 dark:text-neutral-400"></i>
+              <span>Savings Stashes</span>
+            </div>
+          </button>
+          <button onclick="switchTab('tools')" id="nav-tools" class="tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-neutral-300 hover:bg-slate-100 dark:hover:bg-neutral-900 transition-all">
+            <div class="flex items-center gap-3">
+              <i data-lucide="calculator" class="w-4 h-4 text-slate-400 dark:text-neutral-400"></i>
+              <span>Student Tools</span>
+            </div>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Financial Health Score Card -->
+      <div class="card p-4 bg-gradient-to-br from-indigo-50/50 via-white to-white border-indigo-100">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-1.5 text-xs font-bold text-slate-900">
+            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+            <span>Finance Health</span>
+          </div>
+          <span class="text-xs font-mono font-extrabold text-brand-600" id="healthScoreDisplay">100/100</span>
+        </div>
+        <div class="w-full bg-slate-100 rounded-full h-2 mb-2 overflow-hidden">
+          <div id="healthScoreBar" class="h-full bg-gradient-to-r from-emerald-500 to-brand-600 rounded-full transition-all duration-500" style="width: 100%"></div>
+        </div>
+        <p class="text-[11px] text-slate-500 leading-snug" id="healthScoreDesc">
+          Clean slate! Add your allowance and track expenses to monitor financial wellness.
+        </p>
+      </div>
+
+      <!-- Reset / Clear Data -->
+      <div class="p-3 card bg-slate-50 border-dashed text-center">
+        <button onclick="resetAllData()" class="text-[11px] font-semibold text-slate-500 hover:text-rose-600 transition-colors flex items-center justify-center gap-1 mx-auto">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          <span>Clear All Records</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 min-w-0 space-y-6">
+
+      <!-- ==================== TAB: DASHBOARD ==================== -->
+      <div id="view-dashboard" class="space-y-6">
+        
+        <!-- Smart Student Insights Alert -->
+        <div id="smartInsightsBanner" class="p-3.5 rounded-xl bg-indigo-50 border border-indigo-100 text-slate-700 text-xs flex items-center justify-between gap-3 shadow-sm">
+          <div class="flex items-center gap-2.5">
+            <i data-lucide="sparkles" class="w-4 h-4 text-brand-600 shrink-0"></i>
+            <span id="insightText">Welcome! Add your allowance to calculate your <strong>Safe Daily Spend</strong> runway.</span>
+          </div>
+          <button onclick="switchTab('tools')" class="text-brand-600 font-bold text-[11px] hover:underline flex items-center gap-1 shrink-0">
+            <span>Simulate Burn</span>
+            <i data-lucide="arrow-right" class="w-3 h-3"></i>
+          </button>
+        </div>
+
+        <!-- 4 Key Metric Cards in Peso (₱) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Monthly Allowance -->
+          <div class="card p-4 hover:border-emerald-200">
+            <div class="flex items-center justify-between text-xs text-slate-500 mb-1">
+              <span class="font-medium">Monthly Allowance</span>
+              <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <i data-lucide="coins" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div class="text-2xl font-bold font-mono text-slate-900 mb-1" id="metricTotalAllowance">₱0.00</div>
+            <div class="text-xs text-emerald-600 font-medium flex items-center gap-1">
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+              <span id="metricAllowanceSourcesCount">0 active sources</span>
+            </div>
+          </div>
+
+          <!-- Total Spent -->
+          <div class="card p-4 hover:border-rose-200">
+            <div class="flex items-center justify-between text-xs text-slate-500 mb-1">
+              <span class="font-medium">Total Spent (This Month)</span>
+              <div class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
+                <i data-lucide="receipt" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div class="text-2xl font-bold font-mono text-slate-900 mb-1" id="metricTotalSpent">₱0.00</div>
+            <div class="text-xs text-slate-500">
+              <span class="text-rose-600 font-bold" id="metricSpendRatio">0%</span> of allowance used
+            </div>
+          </div>
+
+          <!-- Allowance Buffer Left -->
+          <div class="card p-4 hover:border-brand-200">
+            <div class="flex items-center justify-between text-xs text-slate-500 mb-1">
+              <span class="font-medium">Allowance Buffer Left</span>
+              <div class="w-7 h-7 rounded-lg bg-indigo-50 text-brand-600 flex items-center justify-center">
+                <i data-lucide="piggy-bank" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div class="text-2xl font-bold font-mono text-slate-900 mb-1" id="metricNetRemaining">₱0.00</div>
+            <div class="text-xs text-emerald-600 font-medium">Available balance</div>
+          </div>
+
+          <!-- Safe Daily Spend -->
+          <div class="card p-4 bg-gradient-to-br from-white to-indigo-50/40 border-brand-200 hover:border-brand-300">
+            <div class="flex items-center justify-between text-xs text-brand-600 font-semibold mb-1">
+              <span>Safe Daily Spend</span>
+              <div class="w-7 h-7 rounded-lg bg-brand-600 text-white flex items-center justify-center shadow-sm">
+                <i data-lucide="calendar" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div class="text-2xl font-bold font-mono text-brand-600 mb-1" id="metricSafeDailySpend">₱0.00</div>
+            <div class="text-xs text-slate-500">
+              <span class="font-bold text-slate-800" id="metricDaysLeft">-- days</span> left in cycle
+            </div>
+          </div>
+        </div>
+
+        <!-- Safe Daily Spend Runway Feature Box -->
+        <div id="runwayCard" class="card p-5 bg-gradient-to-r from-white via-white to-slate-50 border-slate-200">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div class="space-y-2 max-w-xl">
+              <div class="flex items-center gap-2">
+                <span class="p-1 rounded-lg bg-indigo-100 text-brand-600">
+                  <i data-lucide="compass" class="w-4 h-4"></i>
+                </span>
+                <h2 class="text-sm font-bold text-slate-900">Student Daily Spend Runway (₱)</h2>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold">
+                  Daily Pacing
+                </span>
+              </div>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                By pacing your day-to-day purchases to under <strong class="text-slate-900" id="runwayDailySpend">₱0.00/day</strong>, you will comfortably reach the next allowance deposit with surplus funds for your savings stashes.
+              </p>
+              
+              <!-- Quick Reference Chips in Peso -->
+              <div class="grid grid-cols-3 gap-2.5 pt-1">
+                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-center">
+                  <div class="text-[10px] text-slate-400 font-medium">Coffee / Milk Tea</div>
+                  <div class="text-xs font-bold text-slate-800 font-mono mt-0.5">₱80 – ₱140</div>
+                </div>
+                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-center">
+                  <div class="text-[10px] text-slate-400 font-medium">Canteen Meal</div>
+                  <div class="text-xs font-bold text-slate-800 font-mono mt-0.5">₱90 – ₱160</div>
+                </div>
+                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-center">
+                  <div class="text-[10px] text-slate-400 font-medium">Readings & Print</div>
+                  <div class="text-xs font-bold text-slate-800 font-mono mt-0.5">₱50 – ₱150</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Box -->
+            <div class="lg:border-l lg:border-slate-200 lg:pl-6 flex flex-col justify-center text-center sm:text-left min-w-[210px]">
+              <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                Recommended Daily Cap
+              </div>
+              <div class="text-3xl font-extrabold font-mono text-emerald-600 my-1" id="runwayBigValue">
+                ₱0.00
+              </div>
+              <div class="text-xs text-slate-500 flex items-center gap-1.5 mt-1">
+                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i>
+                <span id="runwayNextDeposit">No upcoming allowance set</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- 6-Month Trajectory Area Chart -->
+          <div class="lg:col-span-2 card p-5 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <i data-lucide="trending-up" class="w-4 h-4 text-brand-600"></i>
+                  <span>Allowance vs Expenses Trajectory (₱)</span>
+                </h3>
+                <p class="text-xs text-slate-500">Monthly cash inflow vs campus expenditures</p>
+              </div>
+              <span class="text-xs px-2.5 py-1 rounded-lg bg-slate-100 font-mono font-medium text-slate-600">
+                Last 6 Months
+              </span>
+            </div>
+            <div class="h-64 w-full">
+              <canvas id="trendChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Category Doughnut Breakdown -->
+          <div class="card p-5 flex flex-col justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2 mb-1">
+                <i data-lucide="pie-chart" class="w-4 h-4 text-brand-600"></i>
+                <span>Spending by Category (₱)</span>
+              </h3>
+              <p class="text-xs text-slate-500 mb-4">Distribution of this month's funds</p>
+            </div>
+            <div class="h-44 w-full flex items-center justify-center">
+              <canvas id="categoryChart"></canvas>
+            </div>
+            <div class="pt-3 border-t border-slate-100 text-xs space-y-1.5" id="categoryMiniList">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ==================== TAB: ALLOWANCES ==================== -->
+      <div id="view-allowances" class="space-y-6 hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <i data-lucide="wallet-cards" class="w-5 h-5 text-emerald-600"></i>
+              <span>Student Allowance Streams</span>
+            </h2>
+            <p class="text-xs text-slate-500">Track parents' allowance, DOST scholarship, and tutoring / side jobs in Philippine Peso (₱)</p>
+          </div>
+          <button onclick="openAddAllowanceModal()" class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Add Allowance Source</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="allowanceGrid">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+
+      <!-- ==================== TAB: EXPENSES ==================== -->
+      <div id="view-expenses" class="space-y-6 hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <i data-lucide="receipt" class="w-5 h-5 text-rose-600"></i>
+              <span>Student Expense Ledger</span>
+            </h2>
+            <p class="text-xs text-slate-500">Campus food, jeepney/LRT fares, school supplies, GCash & Maya payments</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="exportExpensesCSV()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition-colors shadow-sm">
+              <i data-lucide="download" class="w-3.5 h-3.5 text-slate-500"></i>
+              <span>Export CSV</span>
+            </button>
+            <button onclick="openAddExpenseModal()" class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white shadow-sm transition-all">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>Record Expense</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="card p-3.5 flex flex-col md:flex-row items-center gap-3 bg-white">
+          <div class="relative w-full md:w-72">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-400"></i>
+            <input type="text" id="expenseSearchInput" oninput="renderExpensesTable()" placeholder="Search canteen, jeep, load..." class="clean-input pl-9 text-xs w-full">
+          </div>
+          <div class="w-full md:w-auto flex items-center gap-2">
+            <span class="text-xs text-slate-500 shrink-0">Category:</span>
+            <select id="expenseCategoryFilter" onchange="renderExpensesTable()" class="clean-input text-xs w-full md:w-44 py-1.5">
+              <option value="All">All Categories</option>
+              <option value="Meal Plan & Food">Meal Plan & Food</option>
+              <option value="Groceries">Groceries</option>
+              <option value="Academics & Books">Academics & Books</option>
+              <option value="Housing & Dorm">Housing & Dorm</option>
+              <option value="Tech & Subscriptions">Tech & Subscriptions</option>
+              <option value="Commute & Transit">Commute & Transit</option>
+              <option value="Social & Dining">Social & Dining</option>
+              <option value="Personal Care & Dorm">Personal Care & Dorm</option>
+            </select>
+          </div>
+          <div class="w-full md:w-auto flex items-center gap-2">
+            <span class="text-xs text-slate-500 shrink-0">Payment:</span>
+            <select id="expensePaymentFilter" onchange="renderExpensesTable()" class="clean-input text-xs w-full md:w-40 py-1.5">
+              <option value="All">All Methods</option>
+              <option value="GCash">GCash</option>
+              <option value="Maya">Maya</option>
+              <option value="Cash">Cash</option>
+              <option value="Campus ID Card">Campus ID Card</option>
+              <option value="Debit Card">Debit Card</option>
+            </select>
+          </div>
+          <div class="ml-auto text-xs text-slate-500" id="expenseFilterSummary">
+            Showing 9 expenses
+          </div>
+        </div>
+
+        <!-- Expenses Table -->
+        <div class="card overflow-hidden bg-white">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider text-[10px] border-b border-slate-200 font-semibold">
+                <tr>
+                  <th class="py-3 px-4">Date</th>
+                  <th class="py-3 px-4">Item & Notes</th>
+                  <th class="py-3 px-4">Category</th>
+                  <th class="py-3 px-4">Payment Method</th>
+                  <th class="py-3 px-4 text-right">Amount (₱)</th>
+                  <th class="py-3 px-4 text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100" id="expensesTableBody">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== TAB: BUDGET CAPS ==================== -->
+      <div id="view-budgets" class="space-y-6 hidden">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+            <i data-lucide="pie-chart" class="w-5 h-5 text-brand-600"></i>
+            <span>Category Budget Caps & Guards (₱)</span>
+          </h2>
+          <p class="text-xs text-slate-500">Set monthly limits to keep your allowance intact for midterm and finals</p>
+        </div>
+
+        <!-- Set Cap Form -->
+        <div class="card p-5 bg-white">
+          <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Set or Update Monthly Cap (₱)</h3>
+          <form onsubmit="handleSetBudgetCap(event)" class="flex flex-col sm:flex-row items-center gap-3">
+            <select id="budgetCategorySelect" class="clean-input text-xs w-full sm:w-1/2">
+              <option value="Meal Plan & Food">Meal Plan & Food</option>
+              <option value="Groceries">Groceries</option>
+              <option value="Academics & Books">Academics & Books</option>
+              <option value="Social & Dining">Social & Dining</option>
+              <option value="Tech & Subscriptions">Tech & Subscriptions</option>
+              <option value="Commute & Transit">Commute & Transit</option>
+              <option value="Personal Care & Dorm">Personal Care & Dorm</option>
+            </select>
+            <div class="relative w-full sm:w-1/3">
+              <span class="absolute left-3 top-2.5 text-slate-400 font-mono text-xs">₱</span>
+              <input type="number" id="budgetLimitInput" required min="50" step="50" placeholder="e.g. 4000" class="clean-input pl-7 text-xs w-full font-mono">
+            </div>
+            <button type="submit" class="w-full sm:w-auto px-5 py-2.5 rounded-lg text-xs font-semibold bg-brand-600 hover:bg-brand-700 text-white shadow-sm transition-all whitespace-nowrap">
+              Save Cap
+            </button>
+          </form>
+        </div>
+
+        <!-- Budget Progress Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="budgetLimitsGrid">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+
+      <!-- ==================== TAB: SAVINGS ==================== -->
+      <div id="view-savings" class="space-y-6 hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <i data-lucide="piggy-bank" class="w-5 h-5 text-brand-600"></i>
+              <span>Student Savings Stashes (₱)</span>
+            </h2>
+            <p class="text-xs text-slate-500">Fund your laptop upgrade, sem-break trip, or emergency safety buffer</p>
+          </div>
+          <button onclick="openAddSavingsModal()" class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-brand-600 hover:bg-brand-700 text-white shadow-sm transition-all">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>New Savings Stash</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="savingsGrid">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+
+      <!-- ==================== TAB: STUDENT TOOLS ==================== -->
+      <div id="view-tools" class="space-y-6 hidden">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+            <i data-lucide="calculator" class="w-5 h-5 text-brand-600"></i>
+            <span>Student Utility Hub</span>
+          </h2>
+          <p class="text-xs text-slate-500">Calculators tailored for Filipino dorm life, blockmate splits, and semester financial aid</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Tool 1: Roommate Bill Splitter -->
+          <div class="card p-5 bg-white flex flex-col justify-between">
+            <div class="space-y-4">
+              <div class="flex items-center gap-2 pb-2 border-b border-slate-100">
+                <div class="w-8 h-8 rounded-lg bg-indigo-50 text-brand-600 flex items-center justify-center">
+                  <i data-lucide="users" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h3 class="text-sm font-bold text-slate-900">Blockmate & Dorm Bill Splitter (₱)</h3>
+                  <p class="text-[11px] text-slate-500">Evenly split food deliveries, groceries, and dorm utilities</p>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-slate-600 mb-1">Total Bill Amount (₱)</label>
+                <div class="relative">
+                  <span class="absolute left-3 top-2.5 text-slate-400 font-mono text-xs">₱</span>
+                  <input type="number" id="splitBillAmount" value="760.00" step="5" oninput="calculateSplit()" class="clean-input pl-7 text-xs w-full font-mono">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-medium text-slate-600 mb-1">Number of People</label>
+                  <input type="number" id="splitNumPeople" value="4" min="1" max="25" oninput="calculateSplit()" class="clean-input text-xs w-full font-mono">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-slate-600 mb-1">Service / Delivery Fee (₱)</label>
+                  <input type="number" id="splitDeliveryFee" value="40" step="5" oninput="calculateSplit()" class="clean-input text-xs w-full font-mono">
+                </div>
+              </div>
+
+              <!-- Result Box -->
+              <div class="p-4 rounded-xl bg-indigo-50/50 border border-indigo-100 text-center">
+                <div class="text-[11px] text-slate-500 uppercase font-medium">Each Person Owes</div>
+                <div class="text-3xl font-extrabold font-mono text-brand-600 my-1" id="splitPerPersonResult">₱200.00</div>
+                <div class="text-[11px] text-slate-500" id="splitBreakdownSubtext">Bill: ₱760.00 · Delivery: ₱40.00 · Total: ₱800.00</div>
+              </div>
+            </div>
+
+            <div class="pt-4 mt-4 border-t border-slate-100 flex items-center gap-2">
+              <button onclick="copySplitMessage()" class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                <span id="copySplitBtnText">Copy GCash/Maya Text</span>
+              </button>
+              <button onclick="logMySplitShare()" class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold bg-brand-600 hover:bg-brand-700 text-white transition-colors">
+                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+                <span>Log My Share</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Tool 2: Semester Aid & Loan Burn Simulator -->
+          <div class="card p-5 bg-white flex flex-col justify-between">
+            <div class="space-y-4">
+              <div class="flex items-center gap-2 pb-2 border-b border-slate-100">
+                <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <i data-lucide="graduation-cap" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h3 class="text-sm font-bold text-slate-900">Semester Stipend & Aid Burn Simulator (₱)</h3>
+                  <p class="text-[11px] text-slate-500">Plan semester allowance disbursement across 18 weeks</p>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-slate-600 mb-1">Total Semester Lump Sum / Grant (₱)</label>
+                <div class="relative">
+                  <span class="absolute left-3 top-2.5 text-slate-400 font-mono text-xs">₱</span>
+                  <input type="number" id="simAidAmount" value="45000" step="500" oninput="calculateSimulator()" class="clean-input pl-7 text-xs w-full font-mono">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-medium text-slate-600 mb-1">Fixed Tuition / Books / Dorm (₱)</label>
+                  <div class="relative">
+                    <span class="absolute left-3 top-2.5 text-slate-400 font-mono text-xs">₱</span>
+                    <input type="number" id="simFixedFees" value="15000" step="500" oninput="calculateSimulator()" class="clean-input pl-7 text-xs w-full font-mono">
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-slate-600 mb-1">Semester Length (Weeks)</label>
+                  <input type="number" id="simWeeks" value="18" min="4" max="24" oninput="calculateSimulator()" class="clean-input text-xs w-full font-mono">
+                </div>
+              </div>
+
+              <!-- Result Box -->
+              <div class="p-4 rounded-xl bg-emerald-50/50 border border-emerald-100">
+                <div class="grid grid-cols-2 gap-3 text-center">
+                  <div>
+                    <div class="text-[10px] text-slate-500 uppercase font-medium">Safe Weekly Burn</div>
+                    <div class="text-2xl font-bold font-mono text-emerald-600 mt-1" id="simWeeklyBurn">₱1,666.67</div>
+                    <div class="text-[10px] text-slate-400">per week</div>
+                  </div>
+                  <div class="border-l border-emerald-200/60">
+                    <div class="text-[10px] text-slate-400 uppercase font-medium">Safe Daily Runway</div>
+                    <div class="text-2xl font-bold font-mono text-brand-600 mt-1" id="simDailyRunway">₱238.10</div>
+                    <div class="text-[10px] text-slate-400">per day</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <p class="text-xs text-slate-500 pt-3 border-t border-slate-100 leading-relaxed">
+              Discretionary living balance: <strong class="text-slate-800" id="simNetDiscretionary">₱30,000.00</strong>. Keeping daily expenses under your safe daily runway guarantees you survive finals without borrowing.
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+    <div class="px-4 py-3 rounded-xl bg-slate-900 text-white shadow-xl flex items-center gap-2.5 text-xs font-medium border border-slate-700">
+      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+      <span id="toastMessage">Success</span>
+    </div>
+  </div>
+
+  <!-- MODAL: Fast Log Modal -->
+  <div id="fastLogModal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="card p-6 w-full max-w-md bg-white shadow-2xl space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-indigo-50 text-brand-600 flex items-center justify-center">
+            <i data-lucide="zap" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">Fast Log Student Expense</h3>
+            <p class="text-[11px] text-slate-500">1-click student presets in Peso (₱)</p>
+          </div>
+        </div>
+        <button onclick="closeModal('fastLogModal')" class="text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Presets in PHP -->
+      <div class="grid grid-cols-2 gap-2">
+        <button onclick="setFastPreset('Iced Coffee / Milk Tea', 95, 'Social & Dining')" class="p-2.5 rounded-xl border border-slate-200 hover:border-brand-500 hover:bg-indigo-50/50 text-left transition-all">
+          <div class="text-xs font-semibold text-slate-800">Coffee / Milk Tea</div>
+          <div class="text-xs font-mono font-bold text-emerald-600">₱95.00</div>
+        </button>
+        <button onclick="setFastPreset('Canteen / Karinderya Meal', 120, 'Meal Plan & Food')" class="p-2.5 rounded-xl border border-slate-200 hover:border-brand-500 hover:bg-indigo-50/50 text-left transition-all">
+          <div class="text-xs font-semibold text-slate-800">Canteen Lunch</div>
+          <div class="text-xs font-mono font-bold text-emerald-600">₱120.00</div>
+        </button>
+        <button onclick="setFastPreset('Jeepney / LRT / Beep Card', 35, 'Commute & Transit')" class="p-2.5 rounded-xl border border-slate-200 hover:border-brand-500 hover:bg-indigo-50/50 text-left transition-all">
+          <div class="text-xs font-semibold text-slate-800">Jeep / LRT Fare</div>
+          <div class="text-xs font-mono font-bold text-emerald-600">₱35.00</div>
+        </button>
+        <button onclick="setFastPreset('School Printing & Photocopy', 25, 'Academics & Books')" class="p-2.5 rounded-xl border border-slate-200 hover:border-brand-500 hover:bg-indigo-50/50 text-left transition-all">
+          <div class="text-xs font-semibold text-slate-800">Print / Photocopy</div>
+          <div class="text-xs font-mono font-bold text-emerald-600">₱25.00</div>
+        </button>
+      </div>
+
+      <!-- Form -->
+      <form onsubmit="handleFastLogSubmit(event)" class="space-y-3 pt-2">
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Description</label>
+          <input type="text" id="fastTitle" required placeholder="e.g. Siomai Rice, Photocopied Readings" class="clean-input text-xs w-full">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Amount (₱)</label>
+            <input type="number" id="fastAmount" required step="1" min="1" placeholder="0" class="clean-input text-xs w-full font-mono">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Category</label>
+            <select id="fastCategory" class="clean-input text-xs w-full">
+              <option value="Meal Plan & Food">Meal Plan & Food</option>
+              <option value="Groceries">Groceries</option>
+              <option value="Academics & Books">Academics & Books</option>
+              <option value="Social & Dining">Social & Dining</option>
+              <option value="Commute & Transit">Commute & Transit</option>
+              <option value="Tech & Subscriptions">Tech & Subscriptions</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Payment Method</label>
+          <select id="fastPayment" class="clean-input text-xs w-full">
+            <option value="GCash">GCash</option>
+            <option value="Maya">Maya</option>
+            <option value="Cash">Cash</option>
+            <option value="Campus ID Card">Campus ID Card</option>
+            <option value="Debit Card">Debit Card</option>
+          </select>
+        </div>
+        <div class="pt-3 border-t border-slate-100 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('fastLogModal')" class="px-4 py-2 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded-lg text-xs font-semibold bg-brand-600 hover:bg-brand-700 text-white shadow-sm">Save Expense</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Add Allowance Modal -->
+  <div id="allowanceModal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="card p-6 w-full max-w-md bg-white shadow-2xl space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 class="text-sm font-bold text-slate-900" id="allowanceModalTitle">Add Allowance Stream</h3>
+        <button onclick="closeModal('allowanceModal')" class="text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form onsubmit="handleAllowanceSubmit(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Title</label>
+          <input type="text" id="allowTitle" required placeholder="e.g. Monthly Parent Allowance" class="clean-input text-xs w-full">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Source Type</label>
+            <select id="allowSource" class="clean-input text-xs w-full">
+              <option value="Parents">Parents / Family</option>
+              <option value="Work-Study / Campus Job">Campus Job</option>
+              <option value="Scholarship / Grant">Scholarship (DOST/CHED)</option>
+              <option value="Freelance / Side Gig">Freelance / Online Tutoring</option>
+              <option value="Student Loan">Student Loan / Refund</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Amount (₱)</label>
+            <input type="number" id="allowAmount" required step="50" min="50" placeholder="8000" class="clean-input text-xs w-full font-mono">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Frequency</label>
+            <select id="allowFrequency" class="clean-input text-xs w-full">
+              <option value="Monthly">Monthly</option>
+              <option value="Bi-weekly">Bi-weekly (Every 2 weeks)</option>
+              <option value="Weekly">Weekly</option>
+              <option value="Semester / Lump Sum">Semester Lump Sum</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Next Expected Deposit</label>
+            <input type="date" id="allowDate" class="clean-input text-xs w-full font-mono">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Notes</label>
+          <input type="text" id="allowNotes" placeholder="e.g. Sent via GCash/BDO on the 1st of month" class="clean-input text-xs w-full">
+        </div>
+        <div class="pt-3 border-t border-slate-100 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('allowanceModal')" class="px-4 py-2 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm">Save Allowance</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Add Savings Goal Modal -->
+  <div id="savingsModal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="card p-6 w-full max-w-md bg-white shadow-2xl space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 class="text-sm font-bold text-slate-900">New Savings Stash</h3>
+        <button onclick="closeModal('savingsModal')" class="text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form onsubmit="handleSavingsSubmit(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Stash Title</label>
+          <input type="text" id="savTitle" required placeholder="e.g. Laptop Upgrade, Sem-Break Trip" class="clean-input text-xs w-full">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Target Amount (₱)</label>
+            <input type="number" id="savTarget" required min="100" step="100" placeholder="15000" class="clean-input text-xs w-full font-mono">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Starting Amount (₱)</label>
+            <input type="number" id="savCurrent" min="0" step="50" value="0" class="clean-input text-xs w-full font-mono">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Category</label>
+          <select id="savCategory" class="clean-input text-xs w-full">
+            <option value="Tech Hardware">Tech Hardware (Laptop/iPad)</option>
+            <option value="Travel & Fun">Travel & Fun (Sem-break)</option>
+            <option value="Emergency Reserve">Emergency Reserve</option>
+            <option value="Housing Security Deposit">Dorm Security Deposit</option>
+          </select>
+        </div>
+        <div class="pt-3 border-t border-slate-100 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('savingsModal')" class="px-4 py-2 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded-lg text-xs font-semibold bg-brand-600 hover:bg-brand-700 text-white shadow-sm">Create Stash</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT APP LOGIC (Peso-Based) -->
+  <script>
+    // Clean Initial State: No default student sample data
+    const DEFAULT_DATA = {
+      allowances: [],
+      expenses: [],
+      budgetLimits: [],
+      savingsGoals: []
+    };
+
+    function loadData() {
+      const stored = localStorage.getItem('unispend_data');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          // Auto-purge any legacy sample student records
+          if (parsed.allowances && parsed.allowances.some(a => a.title === 'Monthly Parent Allowance' || a.title === 'DOST / Academic Scholarship')) {
+            localStorage.setItem('unispend_data', JSON.stringify(DEFAULT_DATA));
+            return JSON.parse(JSON.stringify(DEFAULT_DATA));
+          }
+          return parsed;
+        } catch(e) {
+          console.error(e);
+        }
+      }
+      localStorage.setItem('unispend_data', JSON.stringify(DEFAULT_DATA));
+      return JSON.parse(JSON.stringify(DEFAULT_DATA));
+    }
+
+    function saveData(data) {
+      localStorage.setItem('unispend_data', JSON.stringify(data));
+      updateUI();
+    }
+
+    let appData = loadData();
+    let trendChartInstance = null;
+    let categoryChartInstance = null;
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const text = document.getElementById('toastMessage');
+      text.innerText = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function openFastLogModal() {
+      document.getElementById('fastTitle').value = '';
+      document.getElementById('fastAmount').value = '';
+      openModal('fastLogModal');
+    }
+
+    function setFastPreset(title, amount, category) {
+      document.getElementById('fastTitle').value = title;
+      document.getElementById('fastAmount').value = amount;
+      document.getElementById('fastCategory').value = category;
+    }
+
+    function openAddAllowanceModal() {
+      document.getElementById('allowTitle').value = '';
+      document.getElementById('allowAmount').value = '';
+      document.getElementById('allowNotes').value = '';
+      openModal('allowanceModal');
+    }
+
+    function openAddExpenseModal() {
+      openFastLogModal();
+    }
+
+    function openAddSavingsModal() {
+      document.getElementById('savTitle').value = '';
+      document.getElementById('savTarget').value = '';
+      document.getElementById('savCurrent').value = '0';
+      openModal('savingsModal');
+    }
+
+    function switchTab(tabName) {
+      const tabs = ['dashboard', 'allowances', 'expenses', 'budgets', 'savings', 'tools'];
+      tabs.forEach(t => {
+        const view = document.getElementById(`view-${t}`);
+        const btn = document.getElementById(`nav-${t}`);
+        if (t === tabName) {
+          view.classList.remove('hidden');
+          btn.className = 'tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all bg-brand-600 text-white shadow-sm';
+          const icon = btn.querySelector('i');
+          if (icon) icon.className = 'w-4 h-4 text-white';
+        } else {
+          view.classList.add('hidden');
+          btn.className = 'tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-neutral-300 hover:bg-slate-100 dark:hover:bg-neutral-900 transition-all';
+          const icon = btn.querySelector('i');
+          if (icon) icon.className = 'w-4 h-4 text-slate-400 dark:text-neutral-400';
+        }
+      });
+      lucide.createIcons();
+    }
+
+    function getNormalizedMonthlyAllowance() {
+      return appData.allowances.reduce((sum, a) => {
+        let val = Number(a.amount);
+        if (a.frequency === 'Bi-weekly') val = val * 2.16;
+        else if (a.frequency === 'Weekly') val = val * 4.33;
+        else if (a.frequency === 'Semester / Lump Sum') val = val / 4.5;
+        return sum + val;
+      }, 0);
+    }
+
+    function getTotalSpent() {
+      return appData.expenses.reduce((sum, e) => sum + Number(e.amount), 0);
+    }
+
+    function updateUI() {
+      const sym = '₱'; // Peso Sign
+      const monthlyAllowance = getNormalizedMonthlyAllowance();
+      const totalSpent = getTotalSpent();
+      const netRemaining = monthlyAllowance - totalSpent;
+
+      const now = new Date();
+      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      const daysLeft = Math.max(1, daysInMonth - now.getDate());
+      const safeDaily = Math.max(0, netRemaining / daysLeft);
+
+      document.getElementById('metricTotalAllowance').innerText = `${sym}${monthlyAllowance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      document.getElementById('metricAllowanceSourcesCount').innerText = `${appData.allowances.length} active sources`;
+      document.getElementById('metricTotalSpent').innerText = `${sym}${totalSpent.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      
+      const ratio = monthlyAllowance > 0 ? Math.min(100, Math.round((totalSpent / monthlyAllowance) * 100)) : 0;
+      document.getElementById('metricSpendRatio').innerText = `${ratio}%`;
+
+      document.getElementById('metricNetRemaining').innerText = `${sym}${netRemaining.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      document.getElementById('metricSafeDailySpend').innerText = `${sym}${safeDaily.toFixed(2)}`;
+      document.getElementById('metricDaysLeft').innerText = `${daysLeft} days`;
+
+      // Runway box updates
+      if (monthlyAllowance === 0 && totalSpent === 0) {
+        document.getElementById('insightText').innerHTML = 'Welcome! Add your allowance to calculate your <strong>Safe Daily Spend</strong> runway.';
+        document.getElementById('runwayDailySpend').innerText = `${sym}0.00/day`;
+        document.getElementById('runwayBigValue').innerText = `${sym}0.00`;
+      } else {
+        document.getElementById('runwayDailySpend').innerText = `${sym}${safeDaily.toFixed(2)}/day`;
+        document.getElementById('runwayBigValue').innerText = `${sym}${safeDaily.toFixed(2)}`;
+        document.getElementById('insightText').innerHTML = `You have <strong>${sym}${safeDaily.toFixed(2)}/day</strong> safe spending runway remaining for the month.`;
+      }
+
+      if (appData.allowances.length > 0) {
+        document.getElementById('runwayNextDeposit').innerText = `Next: ${appData.allowances[0].title} (${sym}${Number(appData.allowances[0].amount).toLocaleString(undefined, {minimumFractionDigits: 2})})`;
+      } else {
+        document.getElementById('runwayNextDeposit').innerText = 'No upcoming allowance set';
+      }
+
+      // Dynamic Financial Health Score
+      let healthScore = 100;
+      let healthText = 'Clean slate! Add your allowance and track expenses to monitor financial wellness.';
+      if (monthlyAllowance > 0) {
+        if (ratio <= 60) {
+          healthScore = Math.max(80, Math.round(100 - (ratio * 0.3)));
+          healthText = 'Allowance pace is healthy. Discretionary spending remains well within daily limits.';
+        } else if (ratio <= 90) {
+          healthScore = Math.max(50, Math.round(90 - (ratio * 0.4)));
+          healthText = 'Spending is accelerating. Keep an eye on non-essential purchases!';
+        } else if (ratio <= 100) {
+          healthScore = Math.max(30, Math.round(50 - (ratio * 0.2)));
+          healthText = 'Caution: You have used almost all of your monthly allowance.';
+        } else {
+          healthScore = Math.max(10, Math.round(30 - (ratio - 100)));
+          healthText = 'Alert: Total spending has exceeded your monthly allowance.';
+        }
+      }
+      const scoreDisp = document.getElementById('healthScoreDisplay');
+      if (scoreDisp) scoreDisp.innerText = `${healthScore}/100`;
+      const scoreBar = document.getElementById('healthScoreBar');
+      if (scoreBar) scoreBar.style.width = `${healthScore}%`;
+      const scoreDesc = document.getElementById('healthScoreDesc');
+      if (scoreDesc) scoreDesc.innerText = healthText;
+
+      document.getElementById('badgeAllowanceCount').innerText = appData.allowances.length;
+      document.getElementById('badgeExpenseCount').innerText = appData.expenses.length;
+
+      renderCharts();
+      renderAllowances();
+      renderExpensesTable();
+      renderBudgetLimits();
+      renderSavingsGoals();
+      calculateSplit();
+      calculateSimulator();
+      lucide.createIcons();
+    }
+
+    function renderCharts() {
+      const isDark = document.body.classList.contains('dark');
+      const sym = '₱';
+      const monthlyAllowance = getNormalizedMonthlyAllowance();
+      const totalSpent = getTotalSpent();
+
+      const months = ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'];
+      // When starting out clean, show real current spending on latest month and zeros on past months
+      const spentData = months.map((m, idx) => (idx === months.length - 1 ? totalSpent : 0));
+      const allowanceData = months.map(() => monthlyAllowance);
+
+      const ctxTrend = document.getElementById('trendChart').getContext('2d');
+      if (trendChartInstance) {
+        trendChartInstance.options.plugins.legend.labels.color = isDark ? '#ffffff' : '#334155';
+        trendChartInstance.options.scales.y.grid.color = isDark ? 'rgba(255, 255, 255, 0.08)' : '#f1f5f9';
+        trendChartInstance.options.scales.y.ticks.color = isDark ? '#a3a3a3' : '#64748b';
+        trendChartInstance.options.scales.x.ticks.color = isDark ? '#a3a3a3' : '#64748b';
+        trendChartInstance.data.datasets[0].data = allowanceData;
+        trendChartInstance.data.datasets[0].backgroundColor = isDark ? 'rgba(16, 185, 129, 0.15)' : 'rgba(16, 185, 129, 0.08)';
+        trendChartInstance.data.datasets[1].data = spentData;
+        trendChartInstance.data.datasets[1].backgroundColor = isDark ? 'rgba(99, 102, 241, 0.22)' : 'rgba(79, 70, 229, 0.12)';
+        trendChartInstance.update();
+      } else {
+        trendChartInstance = new Chart(ctxTrend, {
+          type: 'line',
+          data: {
+            labels: months,
+            datasets: [
+              {
+                label: 'Allowance',
+                data: allowanceData,
+                borderColor: '#10b981',
+                backgroundColor: isDark ? 'rgba(16, 185, 129, 0.15)' : 'rgba(16, 185, 129, 0.08)',
+                fill: true,
+                tension: 0.3,
+                borderWidth: 2,
+                pointRadius: 3
+              },
+              {
+                label: 'Expenses',
+                data: spentData,
+                borderColor: '#6366f1',
+                backgroundColor: isDark ? 'rgba(99, 102, 241, 0.22)' : 'rgba(79, 70, 229, 0.12)',
+                fill: true,
+                tension: 0.3,
+                borderWidth: 2,
+                pointRadius: 4
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { 
+                position: 'top', 
+                labels: { 
+                  boxWidth: 12, 
+                  color: isDark ? '#ffffff' : '#334155',
+                  font: { family: 'Plus Jakarta Sans', size: 11, weight: '600' } 
+                } 
+              },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => `${ctx.dataset.label}: ${sym}${ctx.parsed.y.toLocaleString(undefined, {minimumFractionDigits: 2})}`
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: { color: isDark ? 'rgba(255, 255, 255, 0.08)' : '#f1f5f9' },
+                ticks: { 
+                  color: isDark ? '#a3a3a3' : '#64748b',
+                  callback: (val) => `${sym}${val.toLocaleString()}`, 
+                  font: { family: 'JetBrains Mono', size: 10 } 
+                }
+              },
+              x: {
+                grid: { display: false },
+                ticks: { 
+                  color: isDark ? '#a3a3a3' : '#64748b',
+                  font: { family: 'Plus Jakarta Sans', size: 11 } 
+                }
+              }
+            }
+          }
+        });
+      }
+
+      const categoryTotals = {};
+      appData.expenses.forEach(e => {
+        categoryTotals[e.category] = (categoryTotals[e.category] || 0) + Number(e.amount);
+      });
+      const catLabels = Object.keys(categoryTotals);
+      const catValues = Object.values(categoryTotals);
+      const catColors = ['#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#f43f5e', '#a855f7', '#64748b'];
+
+      const ctxCat = document.getElementById('categoryChart').getContext('2d');
+      const hasExpenseData = catValues.length > 0 && catValues.some(v => v > 0);
+
+      if (categoryChartInstance) {
+        categoryChartInstance.data.labels = hasExpenseData ? catLabels : ['No Expenses Yet'];
+        categoryChartInstance.data.datasets[0].data = hasExpenseData ? catValues : [1];
+        categoryChartInstance.data.datasets[0].backgroundColor = hasExpenseData ? catColors : [isDark ? '#262626' : '#e2e8f0'];
+        categoryChartInstance.data.datasets[0].borderColor = isDark ? '#000000' : '#ffffff';
+        categoryChartInstance.options.plugins.tooltip.enabled = hasExpenseData;
+        categoryChartInstance.update();
+      } else {
+        categoryChartInstance = new Chart(ctxCat, {
+          type: 'doughnut',
+          data: {
+            labels: hasExpenseData ? catLabels : ['No Expenses Yet'],
+            datasets: [{
+              data: hasExpenseData ? catValues : [1],
+              backgroundColor: hasExpenseData ? catColors : [isDark ? '#262626' : '#e2e8f0'],
+              borderWidth: 2,
+              borderColor: isDark ? '#000000' : '#ffffff'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                enabled: hasExpenseData,
+                callbacks: {
+                  label: (ctx) => `${ctx.label}: ${sym}${ctx.parsed.toLocaleString(undefined, {minimumFractionDigits: 2})}`
+                }
+              }
+            },
+            cutout: '65%'
+          }
+        });
+      }
+
+      const miniList = document.getElementById('categoryMiniList');
+      miniList.innerHTML = '';
+      if (!hasExpenseData) {
+        miniList.innerHTML = `
+          <div class="py-4 text-center text-xs text-slate-400">
+            <p class="font-medium text-slate-500">No expenses recorded yet</p>
+            <p class="text-[11px] mt-0.5 text-slate-400">Tap <span class="font-semibold text-brand-600">"Log Expense"</span> to see your category breakdown!</p>
+          </div>
+        `;
+      } else {
+        catLabels.slice(0, 4).forEach((cat, i) => {
+          miniList.innerHTML += `
+            <div class="flex items-center justify-between text-xs">
+              <div class="flex items-center gap-1.5 truncate">
+                <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${catColors[i % catColors.length]}"></span>
+                <span class="text-slate-600 truncate">${cat}</span>
+              </div>
+              <span class="font-mono font-bold text-slate-800 ml-2">${sym}${categoryTotals[cat].toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+            </div>
+          `;
+        });
+      }
+    }
+
+    function renderAllowances() {
+      const sym = '₱';
+      const grid = document.getElementById('allowanceGrid');
+      grid.innerHTML = '';
+
+      if (appData.allowances.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full card p-8 text-center bg-white border border-dashed border-slate-200">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center mb-3 shadow-inner">
+              <i data-lucide="wallet-cards" class="w-6 h-6"></i>
+            </div>
+            <h4 class="text-sm font-bold text-slate-800 mb-1">No Allowances Added Yet</h4>
+            <p class="text-xs text-slate-500 max-w-sm mx-auto mb-4 leading-relaxed">
+              Add your monthly baon, scholarship stipend, or part-time earnings so UniSpend can calculate your safe daily budget!
+            </p>
+            <button onclick="openAddAllowanceModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm inline-flex items-center gap-1.5 transition-all active:scale-95">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>Add First Allowance</span>
+            </button>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      appData.allowances.forEach(a => {
+        grid.innerHTML += `
+          <div class="card p-5 bg-white flex flex-col justify-between">
+            <div>
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <div>
+                  <h4 class="text-sm font-bold text-slate-900">${a.title}</h4>
+                  <span class="text-[11px] text-slate-400">${a.source}</span>
+                </div>
+                <button onclick="deleteAllowance('${a.id}')" class="p-1 rounded text-slate-400 hover:text-rose-600">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </div>
+              <div class="my-3 pb-3 border-b border-slate-100">
+                <div class="text-2xl font-bold font-mono text-emerald-600">${sym}${Number(a.amount).toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 font-medium text-slate-600">${a.frequency}</span>
+              </div>
+              ${a.notes ? `<p class="text-xs text-slate-500 italic mb-2">"${a.notes}"</p>` : ''}
+            </div>
+            <div class="text-[11px] text-slate-400 flex items-center justify-between pt-2">
+              <span>Next Expected:</span>
+              <span class="font-mono text-slate-700 font-semibold">${a.nextDate || 'Ongoing'}</span>
+            </div>
+          </div>
+        `;
+      });
+      lucide.createIcons();
+    }
+
+    function renderExpensesTable() {
+      const sym = '₱';
+      const search = (document.getElementById('expenseSearchInput').value || '').toLowerCase();
+      const catFilter = document.getElementById('expenseCategoryFilter').value;
+      const payFilter = document.getElementById('expensePaymentFilter').value;
+
+      const filtered = appData.expenses.filter(e => {
+        const matchSearch = e.title.toLowerCase().includes(search);
+        const matchCat = catFilter === 'All' || e.category === catFilter;
+        const matchPay = payFilter === 'All' || e.payment === payFilter;
+        return matchSearch && matchCat && matchPay;
+      });
+
+      document.getElementById('expenseFilterSummary').innerText = `Showing ${filtered.length} expenses`;
+
+      const tbody = document.getElementById('expensesTableBody');
+      tbody.innerHTML = '';
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-10 text-center">
+              <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 mx-auto flex items-center justify-center mb-2">
+                <i data-lucide="receipt" class="w-6 h-6"></i>
+              </div>
+              <p class="text-xs font-semibold text-slate-700 mb-0.5">No expenses recorded yet</p>
+              <p class="text-[11px] text-slate-400 mb-3">Tap "Log Expense" above to record what you spend on food, commute, or school.</p>
+              <button onclick="openFastLogModal()" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-brand-600 hover:bg-brand-700 text-white shadow-sm inline-flex items-center gap-1.5 transition-all active:scale-95">
+                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+                <span>Log First Expense</span>
+              </button>
+            </td>
+          </tr>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      filtered.forEach(e => {
+        tbody.innerHTML += `
+          <tr class="hover:bg-slate-50 transition-colors">
+            <td class="py-3 px-4 font-mono text-slate-500 whitespace-nowrap">${e.date}</td>
+            <td class="py-3 px-4 font-semibold text-slate-900">${e.title}</td>
+            <td class="py-3 px-4 whitespace-nowrap">
+              <span class="px-2 py-0.5 rounded-md text-[11px] bg-slate-100 text-slate-700 font-medium">${e.category}</span>
+            </td>
+            <td class="py-3 px-4 text-slate-600 whitespace-nowrap">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                e.payment === 'GCash' ? 'bg-blue-50 text-blue-600 border border-blue-100' :
+                e.payment === 'Maya' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
+                'bg-slate-100 text-slate-600'
+              }">${e.payment}</span>
+            </td>
+            <td class="py-3 px-4 text-right font-mono font-bold text-rose-600 whitespace-nowrap">-${sym}${Number(e.amount).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+            <td class="py-3 px-4 text-center">
+              <button onclick="deleteExpense('${e.id}')" class="p-1 rounded text-slate-400 hover:text-rose-600">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+      lucide.createIcons();
+    }
+
+    function renderBudgetLimits() {
+      const sym = '₱';
+      const grid = document.getElementById('budgetLimitsGrid');
+      grid.innerHTML = '';
+
+      if (appData.budgetLimits.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full card p-8 text-center bg-white border border-dashed border-slate-200">
+            <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 mx-auto flex items-center justify-center mb-3">
+              <i data-lucide="pie-chart" class="w-6 h-6"></i>
+            </div>
+            <h4 class="text-sm font-bold text-slate-800 mb-1">No Budget Caps Set</h4>
+            <p class="text-xs text-slate-500 max-w-sm mx-auto mb-4 leading-relaxed">
+              Set monthly spending limits for categories like Food, Commute, or Subscriptions to avoid running out of allowance early!
+            </p>
+            <button onclick="openAddBudgetModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-brand-600 hover:bg-brand-700 text-white shadow-sm inline-flex items-center gap-1.5 transition-all active:scale-95">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>Set a Category Budget Cap</span>
+            </button>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      const categoryTotals = {};
+      appData.expenses.forEach(e => {
+        categoryTotals[e.category] = (categoryTotals[e.category] || 0) + Number(e.amount);
+      });
+
+      appData.budgetLimits.forEach(b => {
+        const spent = categoryTotals[b.category] || 0;
+        const limit = Number(b.limit);
+        const pct = Math.round((spent / limit) * 100);
+        const isOver = spent > limit;
+        const isWarning = pct >= 80 && !isOver;
+
+        let barColor = 'bg-emerald-500';
+        let textColor = 'text-emerald-600';
+        if (isOver) {
+          barColor = 'bg-rose-500';
+          textColor = 'text-rose-600';
+        } else if (isWarning) {
+          barColor = 'bg-amber-500';
+          textColor = 'text-amber-600';
+        }
+
+        grid.innerHTML += `
+          <div class="card p-5 bg-white flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-bold text-slate-900">${b.category}</span>
+                <button onclick="deleteBudgetCap('${b.category}')" class="text-slate-400 hover:text-rose-600">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+              <div class="flex items-baseline justify-between mb-2 text-xs">
+                <span class="font-mono font-bold text-slate-800 text-sm">${sym}${spent.toLocaleString(undefined, {minimumFractionDigits: 2})} <span class="text-slate-400 font-normal">/ ${sym}${limit.toLocaleString()}</span></span>
+                <span class="font-mono font-bold ${textColor}">${pct}%</span>
+              </div>
+              <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden mb-3">
+                <div class="h-full ${barColor} rounded-full transition-all" style="width: ${Math.min(100, pct)}%"></div>
+              </div>
+            </div>
+            <div class="text-[11px] pt-2 border-t border-slate-100 flex items-center justify-between text-slate-500">
+              <span>${isOver ? `Over by ${sym}${(spent - limit).toLocaleString(undefined, {minimumFractionDigits: 2})}` : `${sym}${(limit - spent).toLocaleString(undefined, {minimumFractionDigits: 2})} remaining`}</span>
+              <span class="font-mono">Monthly Cap</span>
+            </div>
+          </div>
+        `;
+      });
+      lucide.createIcons();
+    }
+
+    function renderSavingsGoals() {
+      const sym = '₱';
+      const grid = document.getElementById('savingsGrid');
+      grid.innerHTML = '';
+
+      if (appData.savingsGoals.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full card p-8 text-center bg-white border border-dashed border-slate-200">
+            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 mx-auto flex items-center justify-center mb-3">
+              <i data-lucide="piggy-bank" class="w-6 h-6"></i>
+            </div>
+            <h4 class="text-sm font-bold text-slate-800 mb-1">No Savings Stashes Yet</h4>
+            <p class="text-xs text-slate-500 max-w-sm mx-auto mb-4 leading-relaxed">
+              Saving up for a new laptop, sem-break trip, or emergency reserve? Create a savings target and tuck away spare pesos!
+            </p>
+            <button onclick="openAddSavingsModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-amber-600 hover:bg-amber-700 text-white shadow-sm inline-flex items-center gap-1.5 transition-all active:scale-95">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>Create First Savings Stash</span>
+            </button>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      appData.savingsGoals.forEach(g => {
+        const pct = Math.min(100, Math.round((g.current / g.target) * 100));
+        grid.innerHTML += `
+          <div class="card p-5 bg-white flex flex-col justify-between">
+            <div>
+              <div class="flex items-start justify-between gap-2 mb-1">
+                <div>
+                  <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">${g.category}</span>
+                  <h4 class="text-sm font-bold text-slate-900">${g.title}</h4>
+                </div>
+                <button onclick="deleteSavingsGoal('${g.id}')" class="text-slate-400 hover:text-rose-600">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </div>
+              <div class="my-3">
+                <div class="flex items-baseline justify-between mb-1">
+                  <span class="text-xl font-bold font-mono text-slate-900">${sym}${g.current.toLocaleString()}</span>
+                  <span class="text-xs font-mono text-slate-500">Target: ${sym}${g.target.toLocaleString()}</span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden mb-1">
+                  <div class="h-full bg-brand-600 rounded-full transition-all" style="width: ${pct}%"></div>
+                </div>
+                <div class="text-[11px] text-slate-500 flex justify-between">
+                  <span>${pct}% saved</span>
+                  <span>${sym}${(g.target - g.current).toLocaleString()} to go</span>
+                </div>
+              </div>
+            </div>
+            <div class="pt-3 border-t border-slate-100">
+              <div class="text-[10px] text-slate-400 uppercase font-medium mb-1.5">Quick Deposit</div>
+              <div class="grid grid-cols-3 gap-1.5">
+                <button onclick="contributeSavings('${g.id}', 100)" class="py-1 rounded bg-slate-50 hover:bg-indigo-50 border border-slate-200 text-xs font-mono font-bold text-brand-600">+${sym}100</button>
+                <button onclick="contributeSavings('${g.id}', 250)" class="py-1 rounded bg-slate-50 hover:bg-indigo-50 border border-slate-200 text-xs font-mono font-bold text-brand-600">+${sym}250</button>
+                <button onclick="contributeSavings('${g.id}', 500)" class="py-1 rounded bg-slate-50 hover:bg-indigo-50 border border-slate-200 text-xs font-mono font-bold text-brand-600">+${sym}500</button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      lucide.createIcons();
+    }
+
+    // Split Bill Tool in PHP
+    function calculateSplit() {
+      const sym = '₱';
+      const bill = parseFloat(document.getElementById('splitBillAmount').value) || 0;
+      const people = Math.max(1, parseInt(document.getElementById('splitNumPeople').value) || 1);
+      const delivery = parseFloat(document.getElementById('splitDeliveryFee').value) || 0;
+
+      const total = bill + delivery;
+      const perPerson = total / people;
+
+      document.getElementById('splitPerPersonResult').innerText = `${sym}${perPerson.toFixed(2)}`;
+      document.getElementById('splitBreakdownSubtext').innerText = `Bill: ${sym}${bill.toFixed(2)} · Delivery Fee: ${sym}${delivery.toFixed(2)} · Total: ${sym}${total.toFixed(2)}`;
+    }
+
+    function copySplitMessage() {
+      const sym = '₱';
+      const bill = parseFloat(document.getElementById('splitBillAmount').value) || 0;
+      const people = parseInt(document.getElementById('splitNumPeople').value) || 1;
+      const delivery = parseFloat(document.getElementById('splitDeliveryFee').value) || 0;
+      const total = bill + delivery;
+      const perPerson = total / people;
+
+      const text = `Uy blockmates! Our total was ${sym}${total.toFixed(2)} (Bill: ${sym}${bill.toFixed(2)} + ${sym}${delivery.toFixed(2)} delivery). Split among ${people} people, each share is ${sym}${perPerson.toFixed(2)}! Paki-GCash/Maya na lang 😊`;
+      navigator.clipboard.writeText(text);
+      document.getElementById('copySplitBtnText').innerText = 'Copied!';
+      showToast('GCash/Maya split message copied!');
+      setTimeout(() => {
+        document.getElementById('copySplitBtnText').innerText = 'Copy GCash/Maya Text';
+      }, 2000);
+    }
+
+    function logMySplitShare() {
+      const bill = parseFloat(document.getElementById('splitBillAmount').value) || 0;
+      const people = parseInt(document.getElementById('splitNumPeople').value) || 1;
+      const delivery = parseFloat(document.getElementById('splitDeliveryFee').value) || 0;
+      const total = bill + delivery;
+      const perPerson = total / people;
+
+      appData.expenses.unshift({
+        id: Date.now().toString(),
+        title: `Food Delivery Split (${people} people)`,
+        amount: perPerson,
+        category: 'Social & Dining',
+        date: new Date().toISOString().split('T')[0],
+        payment: 'GCash',
+        recurring: false
+      });
+      saveData(appData);
+      showToast('Split share logged to expenses!');
+    }
+
+    function calculateSimulator() {
+      const sym = '₱';
+      const aid = parseFloat(document.getElementById('simAidAmount').value) || 0;
+      const fixed = parseFloat(document.getElementById('simFixedFees').value) || 0;
+      const weeks = Math.max(1, parseInt(document.getElementById('simWeeks').value) || 1);
+
+      const net = Math.max(0, aid - fixed);
+      const weekly = net / weeks;
+      const daily = weekly / 7;
+
+      document.getElementById('simWeeklyBurn').innerText = `${sym}${weekly.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      document.getElementById('simDailyRunway').innerText = `${sym}${daily.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      document.getElementById('simNetDiscretionary').innerText = `${sym}${net.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    }
+
+    function handleFastLogSubmit(e) {
+      e.preventDefault();
+      const title = document.getElementById('fastTitle').value;
+      const amount = parseFloat(document.getElementById('fastAmount').value);
+      const category = document.getElementById('fastCategory').value;
+      const payment = document.getElementById('fastPayment').value;
+
+      appData.expenses.unshift({
+        id: Date.now().toString(),
+        title,
+        amount,
+        category,
+        date: new Date().toISOString().split('T')[0],
+        payment,
+        recurring: false
+      });
+      saveData(appData);
+      closeModal('fastLogModal');
+      showToast(`Logged ₱${amount.toFixed(2)} for ${title}!`);
+    }
+
+    function handleAllowanceSubmit(e) {
+      e.preventDefault();
+      const title = document.getElementById('allowTitle').value;
+      const source = document.getElementById('allowSource').value;
+      const amount = parseFloat(document.getElementById('allowAmount').value);
+      const frequency = document.getElementById('allowFrequency').value;
+      const nextDate = document.getElementById('allowDate').value;
+      const notes = document.getElementById('allowNotes').value;
+
+      appData.allowances.unshift({
+        id: Date.now().toString(),
+        title,
+        source,
+        amount,
+        frequency,
+        nextDate,
+        notes
+      });
+      saveData(appData);
+      closeModal('allowanceModal');
+      showToast(`Allowance stream "${title}" added!`);
+    }
+
+    function deleteAllowance(id) {
+      appData.allowances = appData.allowances.filter(a => a.id !== id);
+      saveData(appData);
+      showToast('Allowance deleted');
+    }
+
+    function deleteExpense(id) {
+      appData.expenses = appData.expenses.filter(e => e.id !== id);
+      saveData(appData);
+      showToast('Expense removed');
+    }
+
+    function handleSetBudgetCap(e) {
+      e.preventDefault();
+      const category = document.getElementById('budgetCategorySelect').value;
+      const limit = parseFloat(document.getElementById('budgetLimitInput').value);
+
+      const existingIdx = appData.budgetLimits.findIndex(b => b.category === category);
+      if (existingIdx !== -1) {
+        appData.budgetLimits[existingIdx].limit = limit;
+      } else {
+        appData.budgetLimits.push({ category, limit });
+      }
+      saveData(appData);
+      document.getElementById('budgetLimitInput').value = '';
+      showToast(`Monthly cap saved for ${category}`);
+    }
+
+    function deleteBudgetCap(category) {
+      appData.budgetLimits = appData.budgetLimits.filter(b => b.category !== category);
+      saveData(appData);
+      showToast('Budget cap removed');
+    }
+
+    function handleSavingsSubmit(e) {
+      e.preventDefault();
+      const title = document.getElementById('savTitle').value;
+      const target = parseFloat(document.getElementById('savTarget').value);
+      const current = parseFloat(document.getElementById('savCurrent').value) || 0;
+      const category = document.getElementById('savCategory').value;
+
+      appData.savingsGoals.push({
+        id: Date.now().toString(),
+        title,
+        target,
+        current,
+        category
+      });
+      saveData(appData);
+      closeModal('savingsModal');
+      showToast(`Savings stash "${title}" created!`);
+    }
+
+    function contributeSavings(id, amt) {
+      const g = appData.savingsGoals.find(g => g.id === id);
+      if (g) {
+        g.current += amt;
+        saveData(appData);
+        showToast(`Added ₱${amt} to ${g.title}!`);
+      }
+    }
+
+    function deleteSavingsGoal(id) {
+      appData.savingsGoals = appData.savingsGoals.filter(g => g.id !== id);
+      saveData(appData);
+      showToast('Savings stash deleted');
+    }
+
+    function exportExpensesCSV() {
+      if (appData.expenses.length === 0) {
+        showToast('No expenses to export');
+        return;
+      }
+      const headers = ['Date', 'Title', 'Category', 'PaymentMethod', 'Amount (PHP)', 'Recurring'];
+      const rows = appData.expenses.map(e => [
+        e.date,
+        `"${e.title.replace(/"/g, '""')}"`,
+        `"${e.category}"`,
+        `"${e.payment}"`,
+        e.amount,
+        e.recurring ? 'Yes' : 'No'
+      ]);
+
+      const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `unispend_expenses_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('CSV downloaded successfully!');
+    }
+
+    function resetAllData() {
+      if (confirm('Clear all your records in UniSpend to start fresh?')) {
+        localStorage.removeItem('unispend_data');
+        appData = loadData();
+        updateUI();
+        showToast('All records cleared! Ready for your fresh data.');
+      }
+    }
+
+    // ==================== INTERACTIVE HUMAN-TONE TUTORIAL ====================
+    const TUTORIAL_STEPS = [
+      {
+        targetId: 'brandLogo',
+        tab: 'dashboard',
+        badge: '🎓 Quick Welcome',
+        title: 'Welcome to UniSpend! 👋',
+        body: 'Hey there! Welcome to your personal student budget co-pilot. College life gets busy, and keeping track of your allowance and daily expenses shouldn\'t feel like extra homework. Let\'s do a quick 1-minute walkthrough so you know what each tab and button is for!',
+        icon: 'sparkles'
+      },
+      {
+        targetId: 'btnLogExpense',
+        tab: 'dashboard',
+        badge: '⚡ Quick Log Presets',
+        title: 'This is where you log expenses! 💸',
+        body: 'Whenever you buy canteen food, pay jeepney or LRT fare, reload your prepaid data, or grab coffee with blockmates, click this button! It takes just 5 seconds, and we have one-click student presets ready in Philippine Peso (₱).',
+        icon: 'plus-circle'
+      },
+      {
+        targetId: 'runwayCard',
+        tab: 'dashboard',
+        badge: '🛡️ Daily Financial Shield',
+        title: 'This calculates your Safe Daily Spend! 🎯',
+        body: 'This is UniSpend\'s superpower! It calculates exactly how many pesos you can safely spend today. As long as you stay under this daily number, you\'ll cruise through the month without ever having to borrow or eat plain instant noodles during finals week!',
+        icon: 'compass'
+      },
+      {
+        targetId: 'nav-allowances',
+        tab: 'allowances',
+        badge: '💵 Income & Baon',
+        title: 'This is for tracking your incoming money! 💰',
+        body: 'Whenever money comes in—whether it\'s your regular baon from your parents, a DOST or university scholarship grant, or cash from part-time tutoring—log it right here! This sets your total monthly spending baseline.',
+        icon: 'wallet-cards'
+      },
+      {
+        targetId: 'nav-expenses',
+        tab: 'expenses',
+        badge: '🧾 Spending History',
+        title: 'This is where you see where every peso went! 📊',
+        body: 'Ever wondered "Where did my entire allowance disappear?" Check this tab! You can search your purchases, filter by payment method like GCash, Maya, or Cash, and even download an Excel/CSV spreadsheet report.',
+        icon: 'receipt'
+      },
+      {
+        targetId: 'nav-budgets',
+        tab: 'budgets',
+        badge: '🎯 Budget Limits',
+        title: 'This is for setting spending limits! 🛑',
+        body: 'Want to make sure you don\'t blow your entire budget on milk tea, eating out, or online shopping? Set a monthly cap here for any category. The bar will turn amber and red to warn you if you\'re close to overspending!',
+        icon: 'pie-chart'
+      },
+      {
+        targetId: 'nav-savings',
+        tab: 'savings',
+        badge: '🐷 Savings Stashes',
+        title: 'This is for saving up for your goals! 💻',
+        body: 'Dreaming of a new laptop, a sem-break beach trip with your blockmates, or building an emergency buffer? Create a savings stash here and deposit extra pesos whenever you have spare cash.',
+        icon: 'piggy-bank'
+      },
+      {
+        targetId: 'nav-tools',
+        tab: 'tools',
+        badge: '🧮 Student Utilities',
+        title: 'This has handy calculators for student life! 🍕',
+        body: 'Eating out in a group and dreading dividing the bill? Use the Group Bill Splitter with GCash numbers! Or test the Budget Simulator to see how much you save by packing lunch instead of buying canteen meals.',
+        icon: 'calculator'
+      },
+      {
+        targetId: 'tourButton',
+        tab: 'dashboard',
+        badge: '🚀 You\'re All Set!',
+        title: 'You\'re ready to start budgeting! 🎉',
+        body: 'That\'s the whole tour! You can start right now by logging your first allowance or recording an expense. And if you ever forget what something is for, just click this "Tour & Guide" button at the top to re-open this walkthrough anytime.',
+        icon: 'check-circle-2'
+      }
+    ];
+
+    let currentTourStep = 0;
+    let tourActive = false;
+
+    function startTutorial(stepIndex = 0) {
+      tourActive = true;
+      currentTourStep = stepIndex;
+      const overlay = document.getElementById('tutorialOverlay');
+      overlay.classList.remove('hidden');
+      renderTourStep();
+    }
+
+    function endTutorial() {
+      tourActive = false;
+      localStorage.setItem('unispend_tutorial_seen', 'true');
+      const overlay = document.getElementById('tutorialOverlay');
+      overlay.classList.add('hidden');
+      clearTourHighlights();
+      switchTab('dashboard');
+    }
+
+    function clearTourHighlights() {
+      document.querySelectorAll('.tour-highlight-active').forEach(el => {
+        el.classList.remove('tour-highlight-active');
+      });
+    }
+
+    function renderTourStep() {
+      const step = TUTORIAL_STEPS[currentTourStep];
+      if (!step) return;
+
+      if (step.tab) {
+        switchTab(step.tab);
+      }
+
+      clearTourHighlights();
+
+      document.getElementById('tourStepBadge').innerText = `${step.badge} • Step ${currentTourStep + 1} of ${TUTORIAL_STEPS.length}`;
+      document.getElementById('tourTitle').innerText = step.title;
+      document.getElementById('tourSubtitle').innerText = step.badge;
+      document.getElementById('tourBody').innerText = step.body;
+
+      const iconEl = document.getElementById('tourIcon');
+      if (iconEl) {
+        iconEl.setAttribute('data-lucide', step.icon || 'help-circle');
+      }
+
+      const prevBtn = document.getElementById('tourPrevBtn');
+      prevBtn.disabled = currentTourStep === 0;
+
+      const nextBtn = document.getElementById('tourNextBtn');
+      if (currentTourStep === TUTORIAL_STEPS.length - 1) {
+        nextBtn.innerHTML = `<span>Finish Tour 🚀</span>`;
+      } else {
+        nextBtn.innerHTML = `<span>Next</span> <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>`;
+      }
+
+      const dotsContainer = document.getElementById('tourDots');
+      dotsContainer.innerHTML = TUTORIAL_STEPS.map((_, i) => `
+        <span class="h-1.5 rounded-full transition-all ${i === currentTourStep ? 'bg-brand-600 w-4' : 'bg-slate-300 w-1.5'}"></span>
+      `).join('');
+
+      lucide.createIcons();
+
+      setTimeout(() => {
+        const targetEl = document.getElementById(step.targetId);
+        if (targetEl) {
+          targetEl.classList.add('tour-highlight-active');
+          const rect = targetEl.getBoundingClientRect();
+          const inView = (
+            rect.top >= 20 &&
+            rect.left >= 0 &&
+            rect.bottom <= window.innerHeight - 20 &&
+            rect.right <= window.innerWidth
+          );
+          if (!inView) {
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+          positionTourCard(targetEl);
+        } else {
+          centerTourCard();
+        }
+      }, 70);
+    }
+
+    function positionTourCard(targetEl) {
+      const card = document.getElementById('tutorialCard');
+      if (!card || !targetEl) return;
+
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const isMobile = viewportWidth < 640;
+
+      // Reset style overrides
+      card.style.right = 'auto';
+      card.style.bottom = 'auto';
+      card.style.transform = 'none';
+
+      if (isMobile) {
+        card.style.left = '16px';
+        card.style.right = '16px';
+        card.style.bottom = '16px';
+        card.style.top = 'auto';
+        card.style.width = 'auto';
+        card.style.maxWidth = 'calc(100vw - 32px)';
+        return;
+      }
+
+      // Desktop / Tablet mode:
+      const targetRect = targetEl.getBoundingClientRect();
+      const cardWidth = Math.min(390, viewportWidth - 32);
+      card.style.width = `${cardWidth}px`;
+      card.style.maxWidth = 'calc(100vw - 32px)';
+      
+      const cardHeight = card.offsetHeight || 290;
+      const margin = 16;
+
+      let left;
+      let top;
+
+      // Strategy 1: Sidebar nav tabs (#nav-...)
+      if (targetEl.id && targetEl.id.startsWith('nav-')) {
+        left = targetRect.right + 18;
+        top = targetRect.top - 8;
+        // If not enough room to the right of sidebar, position below target
+        if (left + cardWidth > viewportWidth - margin) {
+          left = targetRect.left;
+          top = targetRect.bottom + 12;
+        }
+      } 
+      // Strategy 2: Top Header elements (brandLogo, tourButton, btnLogExpense)
+      else if (targetRect.top < 110) {
+        top = targetRect.bottom + 14;
+        if (targetRect.left < viewportWidth / 2) {
+          // Left side of header (e.g. brandLogo)
+          left = targetRect.left;
+        } else {
+          // Right side of header (e.g. tourButton or btnLogExpense)
+          left = targetRect.right - cardWidth;
+        }
+      } 
+      // Strategy 3: Elements inside main body (e.g. runwayCard)
+      else {
+        if (targetRect.bottom + cardHeight + 20 <= viewportHeight) {
+          top = targetRect.bottom + 14;
+        } else {
+          top = Math.max(margin, targetRect.top - cardHeight - 14);
+        }
+        left = targetRect.left;
+      }
+
+      // STRICT VIEWPORT BOUNDS CLAMPING
+      // Guarantees card never clips on left, right, top, or bottom!
+      left = Math.max(margin, Math.min(viewportWidth - cardWidth - margin, left));
+      top = Math.max(margin, Math.min(viewportHeight - cardHeight - margin, top));
+
+      card.style.left = `${Math.round(left)}px`;
+      card.style.top = `${Math.round(top)}px`;
+    }
+
+    function centerTourCard() {
+      const card = document.getElementById('tutorialCard');
+      if (!card) return;
+      card.style.width = '390px';
+      card.style.maxWidth = 'calc(100vw - 32px)';
+      card.style.left = '50%';
+      card.style.top = '50%';
+      card.style.transform = 'translate(-50%, -50%)';
+      card.style.right = 'auto';
+      card.style.bottom = 'auto';
+    }
+
+    function nextTutorialStep() {
+      if (currentTourStep < TUTORIAL_STEPS.length - 1) {
+        currentTourStep++;
+        renderTourStep();
+      } else {
+        endTutorial();
+        showToast('You are ready to roll! Tap "Tour & Guide" anytime for help.');
+      }
+    }
+
+    function prevTutorialStep() {
+      if (currentTourStep > 0) {
+        currentTourStep--;
+        renderTourStep();
+      }
+    }
+
+    window.addEventListener('resize', () => {
+      if (tourActive) {
+        const step = TUTORIAL_STEPS[currentTourStep];
+        if (step) {
+          const targetEl = document.getElementById(step.targetId);
+          if (targetEl) positionTourCard(targetEl);
+          else centerTourCard();
+        }
+      }
+    });
+
+    window.addEventListener('scroll', () => {
+      if (tourActive) {
+        const step = TUTORIAL_STEPS[currentTourStep];
+        if (step) {
+          const targetEl = document.getElementById(step.targetId);
+          if (targetEl) positionTourCard(targetEl);
+        }
+      }
+    }, { passive: true });
+
+    window.addEventListener('keydown', (e) => {
+      if (!tourActive) return;
+      if (e.key === 'Escape') endTutorial();
+      if (e.key === 'ArrowRight') nextTutorialStep();
+      if (e.key === 'ArrowLeft') prevTutorialStep();
+    });
+
+    // Pure Black & Pure White Theme Controls
+    function getTheme() {
+      return localStorage.getItem('unispend_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+
+    function applyTheme(theme) {
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.body.classList.add('dark');
+        localStorage.setItem('unispend_theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.body.classList.remove('dark');
+        localStorage.setItem('unispend_theme', 'light');
+      }
+      lucide.createIcons();
+      if (typeof renderCharts === 'function') {
+        renderCharts();
+      }
+    }
+
+    function toggleTheme() {
+      const current = document.body.classList.contains('dark') ? 'dark' : 'light';
+      const next = current === 'dark' ? 'light' : 'dark';
+
+      // 1. Activate smooth fluid cross-fade transition
+      document.documentElement.classList.add('theme-transitioning');
+
+      // 2. Apply the theme update (drives the animated pill knob & SVG icons via CSS)
+      applyTheme(next);
+
+      // 3. Clean up transition class once smooth transition completes
+      setTimeout(() => {
+        document.documentElement.classList.remove('theme-transitioning');
+      }, 500);
+
+      showToast(next === 'dark' ? 'Pure Black theme activated' : 'Pure White theme activated');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      applyTheme(getTheme());
+      updateUI();
+      // Auto-trigger interactive tour on first visit
+      if (!localStorage.getItem('unispend_tutorial_seen')) {
+        setTimeout(() => {
+          startTutorial(0);
+        }, 500);
+      }
+    });
+  </script>
+
+  <!-- INTERACTIVE TUTORIAL OVERLAY & SPOTLIGHT -->
+  <div id="tutorialOverlay" class="fixed inset-0 z-50 hidden transition-opacity duration-300">
+    <!-- Backdrop with click-outside protection -->
+    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-[2px]" onclick="endTutorial()"></div>
+
+    <!-- Floating Tutorial Popover Card -->
+    <div id="tutorialCard" class="fixed z-[60] bg-white rounded-2xl shadow-2xl border border-slate-200 p-5 sm:p-6 w-[92vw] sm:w-[390px] max-w-[calc(100vw-32px)] max-h-[calc(100vh-32px)] overflow-y-auto transition-all duration-300">
+      
+      <!-- Top header with badge and step dots -->
+      <div class="flex items-center justify-between gap-2 pb-3 mb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <span id="tourStepBadge" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-indigo-50 text-brand-700">
+            Step 1 of 9
+          </span>
+        </div>
+        <button onclick="endTutorial()" class="text-slate-400 hover:text-slate-700 text-xs flex items-center gap-1 p-1 rounded-lg hover:bg-slate-100 transition-colors" title="Skip walkthrough">
+          <span class="text-[11px] font-medium">Skip</span>
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Icon & Title -->
+      <div class="flex items-start gap-3 mb-2.5">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-brand-500/20" id="tourIconContainer">
+          <i data-lucide="sparkles" class="w-5 h-5" id="tourIcon"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-slate-900 leading-snug" id="tourTitle">
+            Welcome to UniSpend! 👋
+          </h3>
+          <span class="text-[11px] text-brand-600 font-semibold" id="tourSubtitle">
+            Quick Start Guide
+          </span>
+        </div>
+      </div>
+
+      <!-- Body text (Human tone) -->
+      <p class="text-xs text-slate-600 leading-relaxed mb-5" id="tourBody">
+        Hey there! Welcome to UniSpend...
+      </p>
+
+      <!-- Progress bar & Navigation footer -->
+      <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
+        <!-- Step indicators / dots -->
+        <div class="flex items-center gap-1.5" id="tourDots"></div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-2">
+          <button onclick="prevTutorialStep()" id="tourPrevBtn" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 border border-slate-200 transition-all disabled:opacity-30 disabled:pointer-events-none">
+            Previous
+          </button>
+          <button onclick="nextTutorialStep()" id="tourNextBtn" class="px-4 py-1.5 rounded-xl text-xs font-semibold bg-brand-600 hover:bg-brand-700 text-white shadow-sm flex items-center gap-1 transition-all active:scale-95">
+            <span>Next</span>
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>
